@@ -11,7 +11,6 @@ class topo:
         self.width = width
         self.height = height
 
-        self.array = np.zeros([self.width, self.height])
         return
 
     def random_index(self):
@@ -28,8 +27,8 @@ class topo:
         topo_vector = []
 
         # http://www.stuffwithstuff.com/robot-frog/3d/hills/hill.html
-        for i in range(self.array.shape[0]):
-            for j in range(self.array.shape[1]):
+        for i in range(self.width):
+            for j in range(self.height):
                 z = r**2 - ((j - x1)**2 + (i - y1)**2)
                 if z > 0:
                     topo_vector.append(z)
@@ -46,20 +45,22 @@ class topo:
         if remainder != 0:
             split_data[-1][1] += remainder
         results = []
-        print(split_data)
-        results = Parallel(n_jobs=threads)(delayed(self.worker)(sl) for sl in split_data)
-        self.final_topo = self.array.flatten()
+        results = Parallel(n_jobs=threads)(delayed(self.worker)(sl) for sl in
+                  split_data)
+        topo_tmp = np.zeros([self.height * self.width])
         for i in results:
-            self.final_topo += i
+            topo_tmp += i
+        self.final_topo = topo_tmp.reshape(self.width, self.height)
+
 
     def worker(self, range_of_hills):
-        vector = self.array.flatten()
+        vector = np.zeros([self.height * self.width])
         for i in range(range_of_hills[0], range_of_hills[1]):
             vector += self.hill()
         return vector
 
     def plot(self):
-        plt.imshow(self.array)
+        plt.imshow(self.final_topo, cmap="terrain")
         plt.show()
 
 
