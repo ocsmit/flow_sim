@@ -40,16 +40,20 @@ class topo:
     def generate_hills(self, number_of_hills, threads=5):
         split_range = number_of_hills // threads
         remainder = number_of_hills % threads
+
         split_data = [[i, i + split_range] for i in range(0,
             number_of_hills - split_range, split_range)]
         if remainder != 0:
             split_data[-1][1] += remainder
+
         results = []
         results = Parallel(n_jobs=threads)(delayed(self.worker)(sl) for sl in
                   split_data)
+
         topo_tmp = np.zeros([self.height * self.width])
         for i in results:
             topo_tmp += i
+
         self.final_topo = topo_tmp.reshape(self.width, self.height)
 
 
